@@ -55,8 +55,8 @@ func main() {
 		util.Check(err)
 		const bufsize int = 1500
 		buf := make([]byte, bufsize)
-		var bytes_recv int = 0
-		var pkts_recv int = 0
+		var bytesReceived int = 0
+		var packetsReceived int = 0
 
 		for {
 			for i := 0; i < bufsize; i ++ {
@@ -72,9 +72,9 @@ func main() {
 			} else if ln == 0 {
 				fmt.Printf("Empty response.\n")
 			}
-			bytes_recv += ln
-			pkts_recv++
-			fmt.Printf("Packets received: %d\tBytes received: %d\r", pkts_recv, bytes_recv)
+			bytesReceived += ln
+			packetsReceived++
+			fmt.Printf("Packets received: %d\tBytes received: %d\r", packetsReceived, bytesReceived)
 			_,_ = Conn.Write(buf[:ln])
 		}
 		conn.Close()

@@ -17,16 +17,16 @@ import (
 func main() {
 
 	// Prepare our listener. It receives filtered data from loopback on a given port
-	port_in, _ := strconv.Atoi(os.Args[1])
-	addr_in := net.UDPAddr{
-		Port: port_in,
+	portIn, _ := strconv.Atoi(os.Args[1])
+	addrIn := net.UDPAddr{
+		Port: portIn,
 	    IP:   net.ParseIP("127.0.0.1"),
 	}
-	conn_in, err := net.ListenUDP("udp", &addr_in)
+	connIn, err := net.ListenUDP("udp", &addrIn)
 	if err != nil {
 	    panic(err)
 	}
-	defer conn_in.Close()
+	defer connIn.Close()
 
 
 	// Generate a certificate and private key to secure the connection
@@ -44,7 +44,7 @@ func main() {
 
 
 	// Prepare the end point to connect to, it will receive encrypted and filtere IPFIX data from us
-	addr_out := &net.UDPAddr{IP: net.ParseIP(os.Args[2]), Port: 2055}
+	addrOut := &net.UDPAddr{IP: net.ParseIP(os.Args[2]), Port: 2055}
 	// Connect to a DTLS server
 	var dtlsConn *dtls.Conn
 	defer func() {
@@ -53,7 +53,7 @@ func main() {
 	var connected bool
 	connected = false
 	currentTime := time.Now()
-	fmt.Printf(currentTime.Format("2006-01-02 15:04:05"))
+	fmt.Printf(currentTime.Format("2006-01-02 13:37:42"))
 	fmt.Printf(": Waiting for listener on ")
 	fmt.Printf(os.Args[2])
 	fmt.Printf(":2055\n")
@@ -61,7 +61,7 @@ func main() {
 	buf := make([]byte, bufsize)
 	for {
 		if connected == false {
-			dtlsConn, err = dtls.Dial("udp", addr_out, config)
+			dtlsConn, err = dtls.Dial("udp", addrOut, config)
 			time.Sleep(5 * time.Second)
 			if err == nil {
 				connected = true
@@ -78,7 +78,7 @@ func main() {
 			for i := 0; i < bufsize; i++ {
 				buf[i] = 0
 			}
-			n, _, err := conn_in.ReadFromUDP(buf)
+			n, _, err := connIn.ReadFromUDP(buf)
 			if err != nil{
 				panic(err)
 			}
