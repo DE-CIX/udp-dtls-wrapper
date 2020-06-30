@@ -62,7 +62,6 @@ func main() {
 	for {
 		if connected == false {
 			dtlsConn, err = dtls.Dial("udp", addrOut, config)
-			time.Sleep(5 * time.Second)
 			if err == nil {
 				connected = true
 				fmt.Printf(currentTime.Format("2006-01-02 15:04:05"))
@@ -70,6 +69,7 @@ func main() {
 				fmt.Printf(os.Args[2])
 				fmt.Printf(":2055\n")
 			} else {
+				time.Sleep(5 * time.Second)
 				//fmt.Println(err)
 				//dtlsConn.Close()
 			}
