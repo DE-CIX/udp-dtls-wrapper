@@ -7,7 +7,7 @@ It finds practical usage for all DE-CIX customers that request their subset of I
 Usage:
  * Log in to the DE-CIX customer portal and look for IPFIX Export in the menu to the left (link to come...)
  * Choose a desired MAC adress and the IP address to which your IPFIX data should be exported to
- * Run the dtls-decrypter and provide it with the IP address of your request (Note that the dtls-decrypter must be run on the machine with that IP address)
+ * Run the dtls-decrypter and provide it with the IP address of your request (Note that the dtls-decrypter must be run on the machine having that IP address)
 
 
 
