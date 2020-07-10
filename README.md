@@ -12,9 +12,9 @@ Usage:
 
 
 To compile, run
-go get ./cmd/dtls-decrypter/main.go
-go build ./cmd/dtls-decrypter/main.go
-./main
+ * go get ./cmd/dtls-decrypter/main.go
+ * go build ./cmd/dtls-decrypter/main.go
+ * ./main
 
 
 Please make sure that your Golang environment is properly configured ($GOPATH, $GOBIN, $GOROOT, etc.)
