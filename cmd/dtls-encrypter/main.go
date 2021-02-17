@@ -1,15 +1,14 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net"
-	"time"
 	"os"
 	"strconv"
+	"time"
+
 	"github.com/pion/dtls"
 	"github.com/pion/dtls/examples/util"
-	"github.com/pion/dtls/pkg/crypto/selfsign"
 )
 
 func main() {
@@ -24,27 +23,23 @@ func main() {
 	// Our address to listen to is 127.0.0.1, the address of the loopback device
 	addrIn := net.UDPAddr{
 		Port: portIn,
-	    IP:   net.ParseIP("127.0.0.1"),
+		IP:   net.ParseIP("127.0.0.1"),
 	}
 	// Get a socket
 	connIn, err := net.ListenUDP("udp", &addrIn)
 	// Error checking
 	if err != nil {
-	    panic(err)
+		panic(err)
 	}
 	// Close our socket on exit
 	defer connIn.Close()
-
-
-
-
 
 	/*
 	   Certificate handling and DTLS setup
 	*/
 
 	// Generate a certificate and private key to secure the outgoing connection
-	certificate, err := selfsign.GenerateSelfSigned()
+	certificate, privKey, err := dtls.GenerateSelfSigned()
 	// Error checking
 	if err != nil {
 		panic(err)
@@ -52,7 +47,8 @@ func main() {
 
 	// Prepare the configuration of the DTLS connection
 	config := &dtls.Config{
-		Certificates:         []tls.Certificate{certificate},
+		Certificate:          certificate,
+		PrivateKey:           privKey,
 		InsecureSkipVerify:   true,
 		ExtendedMasterSecret: dtls.RequireExtendedMasterSecret,
 	}
@@ -65,10 +61,6 @@ func main() {
 	defer func() {
 		util.Check(dtlsConn.Close())
 	}()
-
-
-
-
 
 	/*
 	   Main functionality.
@@ -122,7 +114,7 @@ func main() {
 			// Read from the plain UDP connection and count the bytes
 			n, _, err := connIn.ReadFromUDP(buf)
 			// Error checking
-			if err != nil{
+			if err != nil {
 				panic(err)
 			}
 			// Write as many bytes read out to the encrypted socket
