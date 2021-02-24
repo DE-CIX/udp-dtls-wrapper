@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"runtime"
 	"github.com/pion/dtls"
-	"github.com/pion/dtls/examples/util"
+	// "github.com/pion/dtls/examples/util"
 	"github.com/pion/dtls/pkg/crypto/selfsign"
 )
 
@@ -57,7 +58,7 @@ func main() {
 
 	// Generate a certificate and private key to secure the connection
 	// TODO use DE-CIX official certificates
-	certificate, genErr := selfsign.GenerateSelfSigned()
+	certificate, err := selfsign.GenerateSelfSigned()
 	if err != nil {
 		panic(err)
 	}
