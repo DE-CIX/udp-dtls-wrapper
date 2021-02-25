@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
-	"runtime"
+	"os"
 	"time"
 
 	"github.com/pion/dtls"
@@ -14,7 +14,7 @@ var listenAddress string
 var outputAddress string
 
 func main() {
-	flag.StringVar(&listenAddress, "listen", "192.0.2.1", "Address to listen to")
+	flag.StringVar(&listenAddress, "listen", "", "Address to listen to")
 	flag.StringVar(&outputAddress, "output", "127.0.0.1", "Address to send to")
 	flag.Parse()
 	/*
@@ -23,12 +23,18 @@ func main() {
 
 	// Prepare the IP address from which we want to receive DTLS data
 	var addr *net.UDPAddr
+
+	//Argument handling
+
+	var usageString string
+	usageString = "Usage:\n./dtls-decrypter --listen <IP address> [--output <IP address>]\n"
+
 	if listenAddress != "" {
 		addr = &net.UDPAddr{IP: net.ParseIP(listenAddress), Port: 2055}
 	} else {
 		// Usage "help"
-		fmt.Printf("Please provide an IP address to bind to.")
-		runtime.Goexit() //TODO doesn't work for me right now
+		fmt.Printf(usageString)
+		os.Exit(1)
 	}
 
 	// We want the decrypted data to be sent to our loop back device on port 2055 so we can collect it using:
