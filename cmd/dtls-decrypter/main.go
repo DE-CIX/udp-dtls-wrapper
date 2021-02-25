@@ -6,41 +6,118 @@ import (
 	"net"
 	"os"
 	"time"
-
+	"strings"
+	"strconv"
 	"github.com/pion/dtls"
 )
 
-var listenAddress string
-var outputAddress string
+/*
+		Variables for storing raw and parsed intput flags
+*/
+
+
+var flag0 string			// User input of form 10.10.10.10:2055, specified via --input flag
+var listenAddress string	// IP address parsed from above string
+var listenPort uint16		// Port parsed from above string
+
+var flag1 string			// User input of form 127.0.0.1:2055, specified via --output flag
+var outputAddress string	// IP address parsed from above string
+var outputPort uint16		// Port parsed from above string
+
+var listenHelp string
+var outputHelp string
 
 func main() {
-	flag.StringVar(&listenAddress, "listen", "", "Address to listen to")
-	flag.StringVar(&outputAddress, "output", "127.0.0.1", "Address to send to")
-	flag.Parse()
+
 	/*
-	   Addresses and sockets handling
+		Get the user input
 	*/
 
-	// Prepare the IP address from which we want to receive DTLS data
-	var addr *net.UDPAddr
+	listenHelp = "Address to listen to.\tFormat: <ip addr>[:2055]."
+	outputHelp = "Address to output to.\tFormat: [127.0.0.1][:2055]"
 
-	//Argument handling
+
+	flag.StringVar(&flag0, "listen", "", listenHelp)
+	flag.StringVar(&flag1, "output", "127.0.0.1", outputHelp)
+	flag.Parse()
+
+
+	/*
+		Parse the input and fall back to default values if needed
+	*/
 
 	var usageString string
-	usageString = "Usage:\n./dtls-decrypter --listen <IP address> [--output <IP address>]\n"
+	usageString = "Usage:\n\t-listen string\n\t\t" + listenHelp + "\n\t-output string\n\t\t" + outputHelp + "\n"
 
-	if listenAddress != "" {
-		addr = &net.UDPAddr{IP: net.ParseIP(listenAddress), Port: 2055}
-	} else {
-		// Usage "help"
+	listenArgs := strings.Split(flag0, ":")
+
+	// No listen address provided - we can't bint to any device
+	if listenArgs[0] == "" {
 		fmt.Printf(usageString)
 		os.Exit(1)
 	}
 
+	// Some string provided. TODO sanity check whether this is a valid IPv4 string
+	listenAddress = listenArgs[0]
+
+	// No port to listen to provided. Defaulting to 2055
+	if len(listenArgs) == 1{
+		listenArgs = append(listenArgs, "2055")
+		fmt.Println("Defaulting to listen port 2055")
+	}
+
+	// Parse the given listen port. Also make sure it is in 16 bit range
+	listenPort64, err := strconv.ParseUint(listenArgs[1], 10, 16)
+	listenPort = uint16(listenPort64)
+	if err != nil {
+		fmt.Println("Could not parse listen port!")
+		os.Exit(1)
+	}
+
+	outputArgs := strings.Split(flag1, ":")
+
+	// No output address provided. Fall back to default value of loop back device, 127.0.0.1
+	if len(outputArgs) == 0 {
+		outputArgs = append(outputArgs, "127.0.0.1")
+		fmt.Println("Defaulting to output address 127.0.0.1")
+	}
+
+	// If some string was provided, use it. Otherwise this would be the default address at this point
+	// TODO sanity check for input string being an IPv4 address
+	outputAddress = outputArgs[0]
+
+	// No port to output to provided. Defaulting to 2055
+	if len(outputArgs) == 1{
+		outputArgs = append(outputArgs, "2055")
+		fmt.Println("Defaulting to output port 2055")
+	}
+
+	//Pares the given output port. Also make sure it is in 16 bit range
+	outputPort64, err := strconv.ParseUint(outputArgs[1], 10, 16)
+	outputPort = uint16(outputPort64)
+	if err != nil {
+		fmt.Println("Could not parse output port!")
+		os.Exit(1)
+	}
+
+	fmt.Printf("Listening on %s:%d (UDP) for DTLS traffic.\n", listenAddress, listenPort)
+	fmt.Printf("Sending decrypted traffic to %s:%d (UDP)\n", outputAddress, outputPort)
+
+	//Flag handling
+	// Prepare the IP address from which we want to receive DTLS data
+	var addr *net.UDPAddr
+
+
+	/*
+	   Addresses and sockets handling
+	*/
+
+	addr = &net.UDPAddr{IP: net.ParseIP(listenAddress), Port: int(listenPort)}
+
 	// We want the decrypted data to be sent to our loop back device on port 2055 so we can collect it using:
 	// sudo tcpdump -i lo udp port 2055 -G 30 -w my_ipfix_%F-%T-%Z.pcap
-	// for example
-	ServerAddr, err := net.ResolveUDPAddr("udp", outputAddress+":2055")
+
+	ServerAddr, err := net.ResolveUDPAddr("udp", outputAddress+":"+strconv.Itoa(int(outputPort)))
 	// Error checking
 	if err != nil {
 		panic(err)
