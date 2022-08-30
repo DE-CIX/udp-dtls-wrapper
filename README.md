@@ -37,5 +37,6 @@ This will compile the DTLS decrypter for you. You can use the resulting file ("m
  * Enter your public IPv4 address (e.g. 10.0.0.42) where it says 'IPFIX'
  * Hit 'Enable'
  * Launch the dtls-decrypter on the host with that public IPv4 address using _./bin/dtls-decrypter -listen 10.0.0.42_, or in case of self-compilation: _./main -listen 10.0.0.4_
+ * You can also provide the dtls-decrypter with an optional argument using the -output flag to change the default destination of decrypted traffic, i.e.,, 127.0.0.1:2055 to any other IPv4 address or source port
  * Do not forget to switch off your requested IPFIX Exports if you do not need them anymore
  * You can now pick up your decrypted IPFIX data at the loopback interface on port 2055, or, if specified using _-output <ipv4 address>:<port>_ at any other IPv4 address on a configurable port
